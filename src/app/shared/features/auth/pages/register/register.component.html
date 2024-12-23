@@ -1,0 +1,100 @@
+<!-- shared/features/auth/pages/register/register.component.html -->
+<div class="register-container">
+  <h2>Create Account</h2>
+
+  <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="register-form">
+    <div class="form-group">
+      <label for="name">Full Name</label>
+      <input
+        id="name"
+        type="text"
+        formControlName="name"
+        placeholder="Enter your full name"
+      >
+      <div class="error-message" *ngIf="registerForm.get('name')?.touched && registerForm.get('name')?.invalid">
+        <span *ngIf="registerForm.get('name')?.errors?.['required']">Name is required</span>
+        <span *ngIf="registerForm.get('name')?.errors?.['minlength']">Name must be at least 2 characters</span>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="email">Email</label>
+      <input
+        id="email"
+        type="email"
+        formControlName="email"
+        placeholder="Enter your email"
+      >
+      <div class="error-message" *ngIf="registerForm.get('email')?.touched && registerForm.get('email')?.invalid">
+        <span *ngIf="registerForm.get('email')?.errors?.['required']">Email is required</span>
+        <span *ngIf="registerForm.get('email')?.errors?.['email']">Please enter a valid email</span>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="password">Password</label>
+      <input
+        id="password"
+        type="password"
+        formControlName="password"
+        placeholder="Enter your password"
+      >
+      <div class="error-message" *ngIf="registerForm.get('password')?.touched && registerForm.get('password')?.invalid">
+        <span *ngIf="registerForm.get('password')?.errors?.['required']">Password is required</span>
+        <span *ngIf="registerForm.get('password')?.errors?.['minlength']">Password must be at least 8 characters</span>
+        <span *ngIf="registerForm.get('password')?.errors?.['pattern']">
+          Password must contain uppercase, lowercase, number and special character
+        </span>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="age">Age</label>
+      <input
+        id="age"
+        type="number"
+        formControlName="age"
+        placeholder="Enter your age"
+      >
+      <div class="error-message" *ngIf="registerForm.get('age')?.touched && registerForm.get('age')?.invalid">
+        <span *ngIf="registerForm.get('age')?.errors?.['required']">Age is required</span>
+        <span *ngIf="registerForm.get('age')?.errors?.['min']">Must be at least 18 years old</span>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="monthlyIncome">Monthly Income</label>
+      <input
+        id="monthlyIncome"
+        type="number"
+        formControlName="monthlyIncome"
+        placeholder="Enter your monthly income"
+      >
+      <div class="error-message" *ngIf="registerForm.get('monthlyIncome')?.touched && registerForm.get('monthlyIncome')?.invalid">
+        <span *ngIf="registerForm.get('monthlyIncome')?.errors?.['required']">Monthly income is required</span>
+        <span *ngIf="registerForm.get('monthlyIncome')?.errors?.['min']">Monthly income must be positive</span>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="creditScore">Credit Score</label>
+      <input
+        id="creditScore"
+        type="number"
+        formControlName="creditScore"
+        placeholder="Enter your credit score"
+      >
+      <div class="error-message" *ngIf="registerForm.get('creditScore')?.touched && registerForm.get('creditScore')?.invalid">
+        <span *ngIf="registerForm.get('creditScore')?.errors?.['required']">Credit score is required</span>
+        <span *ngIf="registerForm.get('creditScore')?.errors?.['min']">Credit score must be at least 300</span>
+        <span *ngIf="registerForm.get('creditScore')?.errors?.['max']">Credit score cannot exceed 850</span>
+      </div>
+    </div>
+
+    <button type="submit" [disabled]="registerForm.invalid">Register</button>
+
+    <div class="login-link">
+      Already have an account? <a routerLink="/login">Login here</a>
+    </div>
+  </form>
+</div>

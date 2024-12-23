@@ -60,7 +60,8 @@
               "buildTarget": "eBankify-Angular17:build:production"
             },
             "development": {
-              "buildTarget": "eBankify-Angular17:build:development"
+              "buildTarget": "eBankify-Angular17:build:development",
+              "proxyConfig": "../proxy.conf.json"
             }
           },
           "defaultConfiguration": "development"
@@ -91,5 +92,8 @@
         }
       }
     }
+  },
+  "cli": {
+    "analytics": false
   }
 }
