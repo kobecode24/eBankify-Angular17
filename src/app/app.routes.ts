@@ -7,6 +7,11 @@ import { DashboardComponent } from "./shared/features/dashboard/dashboard.compon
 
 export const routes: Routes = [
   {
+    path: '',
+    redirectTo: 'dashboard',
+    pathMatch: 'full'
+  },
+  {
     path: 'auth',
     children: [
       {
@@ -28,8 +33,7 @@ export const routes: Routes = [
     children: [
       {
         path: 'dashboard',
-        component: DashboardComponent,
-        canActivate: [AuthGuard]
+        component: DashboardComponent
       },
       {
         path: 'admin',
@@ -55,8 +59,7 @@ export const routes: Routes = [
     ]
   },
   {
-    path: '',
-    redirectTo: 'dashboard',
-    pathMatch: 'full'
+    path: '**',
+    redirectTo: 'auth/login'
   }
 ];
