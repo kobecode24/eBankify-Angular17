@@ -1,9 +1,9 @@
-// src/app/app.routes.ts
 import { Routes } from '@angular/router';
 import { LayoutComponent } from './shared/features/auth/pages/layout/layout.component';
 import { AuthGuard } from './core/guards/auth.guard';
 import { RoleGuard } from './core/guards/role.guard';
 import { UserRole } from './core/models/user.model';
+import { DashboardComponent } from "./shared/features/dashboard/dashboard.component";
 
 export const routes: Routes = [
   {
@@ -27,6 +27,11 @@ export const routes: Routes = [
     canActivate: [AuthGuard],
     children: [
       {
+        path: 'dashboard',
+        component: DashboardComponent,
+        canActivate: [AuthGuard]
+      },
+      {
         path: 'admin',
         canActivate: [RoleGuard],
         data: { roles: [UserRole.ADMIN] },
@@ -49,5 +54,9 @@ export const routes: Routes = [
       }
     ]
   },
-  { path: '**', redirectTo: 'auth/login' }
+  {
+    path: '',
+    redirectTo: 'dashboard',
+    pathMatch: 'full'
+  }
 ];

@@ -1,7 +1,6 @@
-// src/app/shared/features/auth/pages/login/login.component.ts
 import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { Router, RouterLink, ActivatedRoute } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../../../../core/services/auth.service';
 import { LoginCredentials } from '../../../../../core/models/auth.model';
@@ -21,7 +20,8 @@ export class LoginComponent {
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private activatedRoute: ActivatedRoute
   ) {
     this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
@@ -30,7 +30,10 @@ export class LoginComponent {
   }
 
   public onSubmit(): void {
+    console.debug('Login form submitted');
+
     if (this.loginForm.valid) {
+      console.debug('Login form is valid, proceeding with submission');
       this.isLoading = true;
       this.loginError = '';
 
@@ -41,9 +44,15 @@ export class LoginComponent {
 
       this.authService.login(credentials).subscribe({
         next: (user) => {
-          this.router.navigate(['/dashboard']);
+          console.debug('Login successful, user:', user);
+          const returnUrl = this.activatedRoute.snapshot.queryParams['returnUrl'] || '/';
+          console.debug('Navigating to:', returnUrl);
+          this.router.navigate([returnUrl]).then(() => {
+            console.debug('Navigation completed');
+          });
         },
         error: (error) => {
+          console.error('Login error:', error);
           this.loginError = 'Invalid email or password';
           this.isLoading = false;
         },
