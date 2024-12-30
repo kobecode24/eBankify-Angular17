@@ -1,32 +1,85 @@
-// core/services/user.service.ts
-import {Injectable} from "@angular/core";
-import {HttpClient, HttpParams} from "@angular/common/http";
-import {Observable} from "rxjs";
-import {User, UserRole} from "../models/user.model";
-import {PaginatedResponse} from "../models/api-response.model";
+import { Injectable } from "@angular/core";
+import { HttpClient, HttpParams } from "@angular/common/http";
+import { Observable } from "rxjs";
+import { UserRole } from "../models/user.model";
+import { environment } from "../../../environments/environment";
+
+// Define the UserResponse interface to match your backend response
+export interface UserResponse {
+  userId: number;
+  name: string;
+  email: string;
+  role: UserRole;
+  age: number;
+  monthlyIncome: number;
+  creditScore: number;
+  isActive?: boolean;
+  accounts?: any[];
+  createdAt: Date;
+  updatedAt: Date;
+}
 
 @Injectable({ providedIn: 'root' })
 export class UserService {
+  private readonly API_URL = `${environment.apiUrl}/users`;
+
   constructor(private http: HttpClient) {}
 
-  getProfile(): Observable<User> {
-    return this.http.get<User>('/api/users/profile');
+  getAllUsers(): Observable<UserResponse[]> {
+    return this.http.get<UserResponse[]>(this.API_URL);
   }
 
-  updateProfile(userData: Partial<User>): Observable<User> {
-    return this.http.put<User>('/api/users/profile', userData);
+  getUserById(id: number): Observable<UserResponse> {
+    return this.http.get<UserResponse>(`${this.API_URL}/${id}`);
   }
 
-  changePassword(passwordData: { currentPassword: string; newPassword: string }): Observable<void> {
-    return this.http.post<void>('/api/users/change-password', passwordData);
+  getUsersByRole(role: UserRole): Observable<UserResponse[]> {
+    return this.http.get<UserResponse[]>(`${this.API_URL}/role/${role}`);
   }
 
-  getUserById(userId: number): Observable<User> {
-    return this.http.get<User>(`/api/users/${userId}`);
+  getUsersByAgeRange(minAge: number, maxAge: number): Observable<UserResponse[]> {
+    const params = new HttpParams()
+      .set('minAge', minAge.toString())
+      .set('maxAge', maxAge.toString());
+    return this.http.get<UserResponse[]>(`${this.API_URL}/age-range`, { params });
   }
 
-  getUsers(filters?: { role?: UserRole; page?: number; size?: number }): Observable<PaginatedResponse<User>> {
-    const params = new HttpParams({ fromObject: filters as any });
-    return this.http.get<PaginatedResponse<User>>('/api/users', { params });
+  getUsersByIncomeRange(minIncome: number, maxIncome: number): Observable<UserResponse[]> {
+    const params = new HttpParams()
+      .set('minIncome', minIncome.toString())
+      .set('maxIncome', maxIncome.toString());
+    return this.http.get<UserResponse[]>(`${this.API_URL}/income-range`, { params });
   }
+
+  getUsersByMinCreditScore(minCreditScore: number): Observable<UserResponse[]> {
+    const params = new HttpParams()
+      .set('minCreditScore', minCreditScore.toString());
+    return this.http.get<UserResponse[]>(`${this.API_URL}/credit-score`, { params });
+  }
+
+  createUser(user: UserRegistrationRequest): Observable<UserResponse> {
+    return this.http.post<UserResponse>(this.API_URL, user);
+  }
+
+  updateUser(id: number, user: UserRegistrationRequest): Observable<UserResponse> {
+    return this.http.put<UserResponse>(`${this.API_URL}/${id}`, user);
+  }
+
+  deleteUser(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.API_URL}/${id}`);
+  }
+
+  checkLoanEligibility(id: number): Observable<boolean> {
+    return this.http.get<boolean>(`${this.API_URL}/${id}/loan-eligibility`);
+  }
+}
+
+export interface UserRegistrationRequest {
+  name: string;
+  email: string;
+  password: string;
+  age: number;
+  monthlyIncome: number;
+  creditScore: number;
+  role: UserRole;
 }

@@ -27,3 +27,21 @@ export interface TransactionRequest {
   sourceAccountId: number;
   destinationAccountId: number;
 }
+
+
+export interface TransactionResponse {
+  transactionId: number;
+  amount: number;
+  type: TransactionType;
+  status: TransactionStatus;
+  sourceAccountId: number;
+  destinationAccountId: number;
+  createdAt: Date;
+}
+
+export interface TransactionRequest {
+  amount: number;
+  sourceAccountId: number;
+  destinationAccountId: number;
+  type: TransactionType;
+}

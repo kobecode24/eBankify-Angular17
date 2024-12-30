@@ -1,17 +1,36 @@
 // core/models/dashboard.model.ts
-import {Transaction} from "./transaction.model";
-
 export interface DashboardStats {
-  totalAccounts: number;
+  totalUsers: number;
+  activeUsers: number;
+  pendingRequests: number;
   totalTransactions: number;
-  totalActiveLoans: number;
-  pendingApprovals: number;
-  recentTransactions: Transaction[];
-  accountBalances: AccountBalance[];
+  lastUpdated: Date;
 }
 
-export interface AccountBalance {
-  accountId: number;
-  balance: number;
+export interface CustomerStats {
+  activeCustomers: number;
+  totalAccounts: number;
+  pendingApplications: number;
+  supportTickets: number;
+}
+
+export interface AccountSummary {
+  accountId: string;
   accountType: string;
+  balance: number;
+  currency: string;
+  status: 'ACTIVE' | 'FROZEN' | 'CLOSED';
+  lastTransaction?: Date;
+}
+
+export interface SupportTicket {
+  ticketId: string;
+  customerId: string;
+  customerName: string;
+  subject: string;
+  priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT';
+  status: 'OPEN' | 'IN_PROGRESS' | 'RESOLVED' | 'CLOSED';
+  createdAt: Date;
+  updatedAt: Date;
+  assignedTo?: string;
 }
