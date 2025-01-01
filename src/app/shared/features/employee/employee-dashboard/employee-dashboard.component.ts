@@ -31,9 +31,6 @@ import {CustomerService} from "../../../../core/services/dashboard.service";
           <div class="support-tickets">
             <div *ngFor="let ticket of supportTickets" class="ticket-card">
               <div class="ticket-info">
-                <h4>{{ticket.subject}}</h4>
-                <p>{{ticket.customerName}}</p>
-                <span class="priority-badge">{{ticket.priority}}</span>
               </div>
               <div class="ticket-actions">
                 <button (click)="handleTicket(ticket)">Handle Request</button>

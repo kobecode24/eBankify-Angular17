@@ -1,51 +1,37 @@
 // core/interceptors/auth.interceptor.ts
-import { Injectable } from '@angular/core';
-import {
-  HttpRequest,
-  HttpHandler,
-  HttpEvent,
-  HttpInterceptor,
-  HttpResponse,
-  HttpErrorResponse
-} from '@angular/common/http';
-import {Observable, throwError} from 'rxjs';
+import { inject } from '@angular/core';
+import { HttpInterceptorFn, HttpErrorResponse } from '@angular/common/http';
 import { TokenService } from '../services/token.service';
-import {catchError, tap} from "rxjs/operators";
-import {Router} from "@angular/router";
+import { Router } from '@angular/router';
+import { catchError, throwError } from 'rxjs';
 
-@Injectable()
-export class AuthInterceptor implements HttpInterceptor {
-  constructor(
-    private tokenService: TokenService,
-    private router: Router
-  ) {}
+export const authInterceptor: HttpInterceptorFn = (req, next) => {
+  const tokenService = inject(TokenService);
+  const router = inject(Router);
 
-  intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-    // Don't add token for auth endpoints
-    if (request.url.includes('/auth/login') || request.url.includes('/auth/register')) {
-      return next.handle(request);
-    }
-
-    const token = this.tokenService.getAccessToken();
-
-    if (token) {
-      request = request.clone({
-        setHeaders: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        withCredentials: true
-      });
-    }
-
-    return next.handle(request).pipe(
-      catchError((error: HttpErrorResponse) => {
-        if (error.status === 401) {
-          this.tokenService.clearTokens();
-          this.router.navigate(['/auth/login']);
-        }
-        return throwError(() => error);
-      })
-    );
+  if (req.url.includes('/auth/login') || req.url.includes('/auth/register')) {
+    return next(req);
   }
-}
+
+  const token = tokenService.getAccessToken();
+
+  if (token) {
+    req = req.clone({
+      setHeaders: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      },
+      withCredentials: true
+    });
+  }
+
+  return next(req).pipe(
+    catchError((error: HttpErrorResponse) => {
+      if (error.status === 401) {
+        tokenService.clearTokens();
+        router.navigate(['/auth/login']);
+      }
+      return throwError(() => error);
+    })
+  );
+};

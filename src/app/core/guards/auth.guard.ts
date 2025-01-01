@@ -10,43 +10,46 @@ export const AuthGuard = (): Observable<boolean> => {
   const authService = inject(AuthService);
   const tokenService = inject(TokenService);
 
-  const token = tokenService.getAccessToken();
-  console.debug('AuthGuard: Current token status', {
-    hasToken: !!token,
-    isExpired: tokenService.isTokenExpired(),
-  });
+  return new Observable<boolean>(subscriber => {
+    const token = tokenService.getAccessToken();
 
-  if (!token || tokenService.isTokenExpired()) {
-    console.debug('AuthGuard: No valid token found, redirecting to login');
-    void router.navigate(['/auth/login'], {
-      queryParams: { returnUrl: router.url },
-    });
-    return of(false);
-  }
-
-  return authService.getCurrentUser().pipe(
-    switchMap(user => {
-      if (!user) {
-        console.debug('AuthGuard: No user found, initializing authentication');
-        return authService.initializeAuthentication().pipe(
-          map(isAuthenticated => {
-            if (!isAuthenticated) {
-              console.debug('AuthGuard: Authentication failed, redirecting to login');
-              void router.navigate(['/auth/login'], {
-                queryParams: { returnUrl: router.url },
-              });
-              return false;
-            }
-            return true;
-          })
-        );
-      }
-
-      console.debug('AuthGuard: Access granted for user', {
-        userId: user.userId,
-        role: user.role,
+    if (!token || tokenService.isTokenExpired()) {
+      console.debug('AuthGuard: Token invalid or expired');
+      void router.navigate(['/auth/login'], {
+        queryParams: { returnUrl: router.url }
       });
-      return of(true);
-    })
-  );
+      subscriber.next(false);
+      subscriber.complete();
+      return;
+    }
+
+    authService.getCurrentUser().pipe(
+      switchMap(user => {
+        if (!user) {
+          return authService.initializeAuthentication();
+        }
+        return of(true);
+      }),
+      map(isAuthenticated => {
+        if (!isAuthenticated) {
+          void router.navigate(['/auth/login'], {
+            queryParams: { returnUrl: router.url }
+          });
+          return false;
+        }
+        return true;
+      })
+    ).subscribe({
+      next: (value) => {
+        subscriber.next(value);
+        subscriber.complete();
+      },
+      error: (error) => {
+        console.error('Authentication error:', error);
+        void router.navigate(['/auth/login']);
+        subscriber.next(false);
+        subscriber.complete();
+      }
+    });
+  });
 };
