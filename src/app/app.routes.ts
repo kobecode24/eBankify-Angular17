@@ -69,7 +69,15 @@ export const routes: Routes = [
         data: { roles: [UserRole.EMPLOYEE] },
         loadComponent: () => import('./shared/features/employee/employee-dashboard/employee-dashboard.component')
           .then(m => m.EmployeeDashboardComponent)
-      }
+      },
+
+      {
+        path: 'transactions',
+        canActivate: [RoleGuard],
+        data: { roles: [UserRole.USER, UserRole.ADMIN, UserRole.EMPLOYEE] },
+        loadComponent: () => import('./shared/features/transactions/transaction-list/transaction-list.component')
+          .then(m => m.TransactionListComponent)
+      },
     ]
   },
 

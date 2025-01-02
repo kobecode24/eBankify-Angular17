@@ -1,6 +1,8 @@
 import { Injectable, inject, signal, computed, effect } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import {Observable, catchError, tap, throwError, of} from 'rxjs';
+import { PaginatedResponse } from '../models/api-response.model';
+
 import {
   TransactionResponse,
   TransactionRequest,
@@ -15,11 +17,114 @@ export class TransactionService {
   private http = inject(HttpClient);
   private readonly API_URL = `${environment.apiUrl}/transactions`;
 
+  private currentPage = signal<number>(0);
+  private pageSize = signal<number>(10);
+  private totalElements = signal<number>(0);
+  private totalPages = signal<number>(0);
+
+  readonly totalElementsCount = computed(() => this.totalElements());
+  readonly currentPageNumber = computed(() => this.currentPage());
+  readonly currentPageSize = computed(() => this.pageSize());
+  readonly totalPagesCount = computed(() => this.totalPages());
+
   // Core state signals
   private transactions = signal<TransactionResponse[]>([]);
   private selectedAccountId = signal<number | null>(null);
   isLoading = signal(false);
   error = signal<string | null>(null);
+
+
+  getAllTransactions(
+    page: number = 0,
+    size: number = 10,
+    sortBy: string = 'createdAt',
+    sortDirection: string = 'desc'
+  ): Observable<PaginatedResponse<TransactionResponse>> {
+    this.isLoading.set(true);
+    this.error.set(null);
+
+    let params = new HttpParams()
+      .set('page', page.toString())
+      .set('size', size.toString())
+      .set('sortBy', sortBy)
+      .set('sortDirection', sortDirection);
+
+    return this.http.get<PaginatedResponse<TransactionResponse>>(`${this.API_URL}`, { params })
+      .pipe(
+        tap({
+          next: (response) => {
+            queueMicrotask(() => {
+              this.transactions.set(response.content);
+              this.currentPage.set(response.number);
+              this.pageSize.set(response.size);
+              this.totalElements.set(response.totalElements);
+              this.totalPages.set(response.totalPages);
+              this.isLoading.set(false);
+            });
+          },
+          error: (err) => {
+            queueMicrotask(() => {
+              this.error.set('Failed to load transactions');
+              this.isLoading.set(false);
+            });
+            console.error('Error loading transactions:', err);
+          }
+        })
+      );
+  }
+
+  getAllTransactionsWithFilters(
+    page: number = 0,
+    size: number = 10,
+    sortBy: string = 'createdAt',
+    sortDirection: string = 'desc',
+    filters: any
+  ): Observable<PaginatedResponse<TransactionResponse>> {
+    let params = new HttpParams()
+      .set('page', page.toString())
+      .set('size', size.toString())
+      .set('sortBy', sortBy)
+      .set('sortDirection', sortDirection);
+
+    if (filters.search) {
+      params = params.set('search', filters.search);
+    }
+    if (filters.type) {
+      params = params.set('type', filters.type);
+    }
+    if (filters.status) {
+      params = params.set('status', filters.status);
+    }
+    if (filters.startDate) {
+      params = params.set('startDate', filters.startDate.toISOString());
+    }
+    if (filters.endDate) {
+      params = params.set('endDate', filters.endDate.toISOString());
+    }
+
+    return this.http.get<PaginatedResponse<TransactionResponse>>(`${this.API_URL}`, { params })
+      .pipe(
+        tap({
+          next: (response) => {
+            queueMicrotask(() => {
+              this.transactions.set(response.content);
+              this.currentPage.set(response.number);
+              this.pageSize.set(response.size);
+              this.totalElements.set(response.totalElements);
+              this.totalPages.set(response.totalPages);
+              this.isLoading.set(false);
+            });
+          },
+          error: (err) => {
+            queueMicrotask(() => {
+              this.error.set('Failed to load transactions');
+              this.isLoading.set(false);
+            });
+            console.error('Error loading transactions:', err);
+          }
+        })
+      );
+  }
 
   // Computed values
   readonly recentTransactions = computed(() =>
@@ -156,5 +261,12 @@ export class TransactionService {
 
   getCurrentAccountId(): number | null {
     return this.selectedAccountId();
+  }
+
+  updateTransactions(newTransactions: TransactionResponse[]) {
+    this.transactions.set(newTransactions.map(tx => ({
+      ...tx,
+      createdAt: new Date(tx.createdAt)
+    })));
   }
 }

@@ -10,10 +10,8 @@ export interface PaginatedResponse<T> {
   content: T[];
   totalElements: number;
   totalPages: number;
-  pageNumber: number;
-  pageSize: number;
-  last: boolean;
-  first: boolean;
+  size: number;
+  number: number;
 }
 
 export interface ErrorResponse {

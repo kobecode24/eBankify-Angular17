@@ -55,6 +55,7 @@ export class AuthService {
       tap(response => {
         this.handleAuthenticationSuccess(response);
         void this.router.navigate(['/dashboard']);
+        window.location.reload();
       }),
       map(response => response.user),
       catchError(error => {
