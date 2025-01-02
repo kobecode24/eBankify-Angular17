@@ -1,0 +1,96 @@
+// admin-dashboard.component.scss
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.stat-card {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+
+  h3 {
+    margin: 0;
+    color: #666;
+    font-size: 0.875rem;
+  }
+
+  .value {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin: 0.5rem 0 0;
+    color: #2c3e50;
+  }
+}
+
+.user-management-tools {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+
+  .search-bar {
+    flex: 1;
+    margin-right: 1rem;
+
+    input {
+      width: 100%;
+      padding: 0.5rem;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+  }
+}
+
+.user-list {
+  display: grid;
+  gap: 1rem;
+
+  .user-card {
+    background: white;
+    padding: 1rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    .user-info {
+      h4 {
+        margin: 0;
+      }
+
+      .role-badge {
+        display: inline-block;
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+        font-size: 0.75rem;
+        font-weight: 500;
+        text-transform: uppercase;
+
+        &.admin {
+          background: #e3f2fd;
+          color: #1976d2;
+        }
+
+        &.employee {
+          background: #f3e5f5;
+          color: #7b1fa2;
+        }
+
+        &.user {
+          background: #e8f5e9;
+          color: #388e3c;
+        }
+      }
+    }
+
+    .user-actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+  }
+}

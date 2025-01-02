@@ -1,4 +1,4 @@
-import { Component, computed, effect, inject } from '@angular/core';
+import {Component, computed, effect, inject, signal} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AuthService } from "../../../../core/services/auth.service";
 import { AccountService } from "../../../../core/services/account.service";
@@ -74,17 +74,21 @@ import { toSignal } from '@angular/core/rxjs-interop';
 
           <div class="transaction-list">
             @for(transaction of recentTransactions(); track transaction.transactionId) {
-              <div class="transaction-item">
-                <span class="transaction-date">
-                  {{transaction.createdAt | date:'short'}}
-                </span>
-                <span class="transaction-type" [class]="transaction.type.toLowerCase()">
-                  {{transaction.type}}
-                </span>
-                <span class="transaction-amount"
-                      [class.credit]="isCredit(transaction)">
-                  {{transaction.amount | currency}}
-                </span>
+              <div class="transaction-item" [class.credit]="isCredit(transaction)">
+                <div class="transaction-details">
+          <span class="transaction-date">
+            {{formatTransactionDate(transaction.createdAt) | date:'medium':'UTC':'en-US'}}
+          </span>
+                  <span class="transaction-type" [class]="transaction.type.toLowerCase()">
+            {{transaction.type}}
+          </span>
+                  <span class="transaction-id">ID: {{transaction.transactionId}}</span>
+                </div>
+                <div class="transaction-amount-details">
+          <span class="transaction-amount" [class.credit]="isCredit(transaction)">
+            {{(isCredit(transaction) ? '+' : '-') + (transaction.amount | currency)}}
+          </span>
+                </div>
               </div>
             }
             @empty {
@@ -103,6 +107,8 @@ export class BankingDashboardComponent {
   private readonly auth = inject(AuthService);
   protected readonly accountService = inject(AccountService);
   protected readonly transactionService = inject(TransactionService);
+  private readonly selectedAccountForTransactions = signal<number | null>(null);
+
 
   // Computed signals
   readonly user = this.auth.user;
@@ -118,10 +124,25 @@ export class BankingDashboardComponent {
       }
     });
 
-    effect(() => {
+    const activeAccountId = computed(() => {
       const activeAccounts = this.accounts();
-      if (activeAccounts.length > 0) {
-        this.loadRecentTransactions(activeAccounts[0].accountId);
+      return activeAccounts.length > 0 ? activeAccounts[0].accountId : null;
+    });
+
+    effect(
+      () => {
+        const accountId = activeAccountId();
+        if (accountId) {
+          this.selectedAccountForTransactions.set(accountId);
+        }
+      },
+      { allowSignalWrites: true }
+    );
+
+    effect(() => {
+      const selectedAccountId = this.selectedAccountForTransactions();
+      if (selectedAccountId) {
+        this.loadRecentTransactions(selectedAccountId);
       }
     });
   }
@@ -148,7 +169,17 @@ export class BankingDashboardComponent {
   }
 
   protected viewTransactions(account: AccountResponse): void {
-    this.transactionService.loadAccountTransactions(account.accountId).subscribe();
+    // Set the selected account first
+    this.selectedAccountForTransactions.set(account.accountId);
+    // Then load transactions
+    this.transactionService.loadAccountTransactions(account.accountId).subscribe({
+      next: () => {
+        console.debug('Transactions loaded for account:', account.accountId);
+      },
+      error: (error) => {
+        console.error('Error loading transactions:', error);
+      }
+    });
   }
 
   protected initiateTransfer(account: AccountResponse): void {
@@ -160,5 +191,23 @@ export class BankingDashboardComponent {
     // this.dialog.open(TransferDialogComponent, {
     //   data: { account }
     // });
+  }
+
+  protected formatTransactionDate(date: any): Date {
+    if (date instanceof Date) return date;
+
+    // Handle string date
+    if (typeof date === 'string') {
+      return new Date(date);
+    }
+
+    // Handle array format [year, month, day, hour, minute, second]
+    if (Array.isArray(date)) {
+      const [year, month, day, hour, minute, second] = date;
+      return new Date(year, month - 1, day, hour, minute, second);
+    }
+
+    // Default fallback
+    return new Date();
   }
 }

@@ -82,4 +82,5 @@ export interface UserRegistrationRequest {
   monthlyIncome: number;
   creditScore: number;
   role: UserRole;
+  isActive?: boolean;
 }

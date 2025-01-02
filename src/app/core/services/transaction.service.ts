@@ -1,6 +1,6 @@
 import { Injectable, inject, signal, computed, effect } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable, catchError, tap, throwError } from 'rxjs';
+import {Observable, catchError, tap, throwError, of} from 'rxjs';
 import {
   TransactionResponse,
   TransactionRequest,
@@ -8,6 +8,7 @@ import {
   TransactionStatus
 } from '../models/transaction.model';
 import { environment } from '../../../environments/environment';
+import {map} from "rxjs/operators";
 
 @Injectable({ providedIn: 'root' })
 export class TransactionService {
@@ -47,23 +48,36 @@ export class TransactionService {
   }
 
   loadAccountTransactions(accountId: number): Observable<TransactionResponse[]> {
+    if (!accountId) return of([]);
+
     this.isLoading.set(true);
     this.error.set(null);
-    this.selectedAccountId.set(accountId);
 
-    return this.http.get<TransactionResponse[]>(`${this.API_URL}/account/${accountId}`)
-      .pipe(
-        tap(transactions => {
-          this.transactions.set(transactions);
-          this.isLoading.set(false);
-        }),
-        catchError(err => {
-          const errorMessage = 'Failed to load transactions';
-          this.error.set(errorMessage);
-          this.isLoading.set(false);
-          return throwError(() => new Error(errorMessage));
-        })
-      );
+    return this.http.get<TransactionResponse[]>(`${this.API_URL}/account/${accountId}`).pipe(
+      map(transactions => transactions.map(tx => ({
+        ...tx,
+        createdAt: new Date(tx.createdAt)
+      }))),
+      tap({
+        next: (transactions) => {
+          queueMicrotask(() => {
+            this.transactions.set(transactions);
+            this.isLoading.set(false);
+          });
+        },
+        error: (err) => {
+          queueMicrotask(() => {
+            this.error.set('Failed to load transactions');
+            this.isLoading.set(false);
+          });
+          console.error('Transaction loading error:', err);
+        }
+      }),
+      catchError(err => {
+        this.isLoading.set(false);
+        return throwError(() => err);
+      })
+    );
   }
 
   createTransaction(request: TransactionRequest): Observable<TransactionResponse> {

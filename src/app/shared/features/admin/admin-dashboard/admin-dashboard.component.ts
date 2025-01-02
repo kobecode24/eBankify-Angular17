@@ -1,15 +1,29 @@
 // features/admin/admin-dashboard/admin-dashboard.component.ts
-import { Component, OnInit } from '@angular/core';
+import {Component, OnInit, signal} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {DashboardLayoutComponent} from "../../../components/dashboard-layout/dashboard-layout.component";
 import {DashboardStats} from "../../../../core/models/dashboard.model";
 import {DashboardService} from "../../../../core/services/dashboard.service";
-import {UserResponse, UserService} from "../../../../core/services/user.service";
+import {UserRegistrationRequest, UserResponse, UserService} from "../../../../core/services/user.service";
+import {MatSnackBar, MatSnackBarModule} from "@angular/material/snack-bar";
+import {Dialog} from "@angular/cdk/dialog";
+import {UserEditDialogComponent} from "./user-edit-dialog.component";
+import {UserCreateDialogComponent} from "./user-create-dialog.component";
+import {MatDialogModule} from "@angular/material/dialog";
+import {FormsModule} from "@angular/forms";
+import { MatDialog } from '@angular/material/dialog';
+
 
 @Component({
   selector: 'app-admin-dashboard',
   standalone: true,
-  imports: [CommonModule, DashboardLayoutComponent],
+  imports: [CommonModule,
+    FormsModule,
+    MatDialogModule,
+    MatSnackBarModule,
+    DashboardLayoutComponent,
+    UserEditDialogComponent,
+    UserCreateDialogComponent],
   template: `
     <app-dashboard-layout title="Administrator Dashboard">
       <div stats class="stats-grid">
@@ -70,11 +84,15 @@ export class AdminDashboardComponent implements OnInit {
   stats: DashboardStats | null = null;
   users: UserResponse[] = [];
   isLoading = false;
+  searchQuery = signal('');
 
   constructor(
     private dashboardService: DashboardService,
-    private userService: UserService
+    private userService: UserService,
+    private snackBar: MatSnackBar,
+    private dialog: MatDialog,
   ) {}
+
 
   ngOnInit() {
     this.loadDashboardData();
@@ -114,14 +132,90 @@ export class AdminDashboardComponent implements OnInit {
   }*/
 
   editUser(user: UserResponse) {
-    // Implement edit user logic
+    const dialogRef = this.dialog.open<UserEditDialogComponent, {user: UserResponse}, any>(
+      UserEditDialogComponent,
+      {
+        width: '500px',
+        data: { user }
+      }
+    );
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.userService.updateUser(user.userId, result).subscribe({
+          next: () => {
+            this.snackBar.open('User updated successfully', 'Close', { duration: 3000 });
+            this.loadUsers();
+          },
+          error: (error) => {
+            console.error('Failed to update user:', error);
+            this.snackBar.open('Failed to update user', 'Close', { duration: 3000 });
+          }
+        });
+      }
+    });
   }
 
   toggleUserStatus(user: UserResponse) {
-    // Implement user status toggle logic
+    // Convert UserResponse to UserRegistrationRequest
+    const updateRequest: UserRegistrationRequest = {
+      name: user.name,
+      email: user.email,
+      password: '',
+      age: user.age,
+      monthlyIncome: user.monthlyIncome,
+      creditScore: user.creditScore,
+      role: user.role,
+      isActive: !user.isActive
+    };
+
+    this.userService.updateUser(user.userId, updateRequest).subscribe({
+      next: () => {
+        this.snackBar.open('User status updated successfully', 'Close', { duration: 3000 });
+        this.loadUsers();
+      },
+      error: (error) => {
+        console.error('Failed to toggle user status:', error);
+        this.snackBar.open('Failed to update user status', 'Close', { duration: 3000 });
+      }
+    });
   }
 
   openNewUserModal() {
-    // Implement new user creation logic
+    const dialogRef = this.dialog.open<UserCreateDialogComponent, void, any>(
+      UserCreateDialogComponent,
+      { width: '500px' }
+    );
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.userService.createUser(result).subscribe({
+          next: () => {
+            this.snackBar.open('User created successfully', 'Close', { duration: 3000 });
+            this.loadUsers();
+          },
+          error: (error) => {
+            console.error('Failed to create user:', error);
+            this.snackBar.open('Failed to create user', 'Close', { duration: 3000 });
+          }
+        });
+      }
+    });
   }
+
+  searchUsers(event: Event) {
+    const query = (event.target as HTMLInputElement).value;
+    this.searchQuery.set(query);
+
+    if (query.length >= 3) {
+      this.users = this.users.filter(user =>
+        user.name.toLowerCase().includes(query.toLowerCase()) ||
+        user.email.toLowerCase().includes(query.toLowerCase())
+      );
+    } else if (query.length === 0) {
+      this.loadUsers();
+    }
+  }
+
+
 }

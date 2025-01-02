@@ -20,3 +20,18 @@ export enum UserRole {
   EMPLOYEE = 'EMPLOYEE'
 }
 
+// user response
+export interface UserResponse {
+  userId: number;
+  name: string;
+  email: string;
+  role: UserRole;
+  age: number;
+  monthlyIncome: number;
+  creditScore: number;
+  isActive?: boolean;
+  accounts?: Account[];
+  createdAt: Date;
+  updatedAt: Date;
+}
+
