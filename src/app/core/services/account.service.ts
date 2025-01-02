@@ -38,6 +38,36 @@ export class AccountService {
     });
   }
 
+  getAllAccounts(): Observable<AccountResponse[]> {
+    this.isLoading.set(true);
+    this.error.set(null);
+
+    return this.http.get<AccountResponse[]>(`${this.API_URL}`).pipe(
+      tap({
+        next: (accounts) => {
+          queueMicrotask(() => {
+            this.accounts.set(accounts);
+            this.isLoading.set(false);
+          });
+        },
+        error: (err: Error) => {
+          queueMicrotask(() => {
+            this.error.set('Failed to load accounts');
+            this.isLoading.set(false);
+          });
+          console.error('Error loading accounts:', err);
+        }
+      })
+    );
+  }
+
+  updateAccounts(updatedAccounts: AccountResponse[]): void {
+    this.accounts.set(updatedAccounts.map(account => ({
+      ...account,
+      status: account.status as AccountStatus
+    })));
+  }
+
   loadUserAccounts(userId: number): Observable<AccountResponse[]> {
     return this.http.get<AccountResponse[]>(`${this.API_URL}/user/${userId}`).pipe(
       tap({
@@ -146,5 +176,12 @@ export class AccountService {
       this.selectedAccount.set(account);
     }
   }
+
+  private currentPage = signal<number>(0);
+  private pageSize = signal<number>(10);
+  private totalElements = signal<number>(0);
+
+  readonly currentPageNumber = computed(() => this.currentPage());
+  readonly totalElementsCount = computed(() => this.totalElements());
 }
 //

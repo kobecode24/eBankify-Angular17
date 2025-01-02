@@ -78,6 +78,14 @@ export const routes: Routes = [
         loadComponent: () => import('./shared/features/transactions/transaction-list/transaction-list.component')
           .then(m => m.TransactionListComponent)
       },
+
+      {
+        path: 'accounts',
+        canActivate: [RoleGuard],
+        data: { roles: [UserRole.USER, UserRole.ADMIN, UserRole.EMPLOYEE] },
+        loadComponent: () => import('./shared/features/accounts/account-list/account-list.component')
+          .then(m => m.AccountListComponent)
+      },
     ]
   },
 
