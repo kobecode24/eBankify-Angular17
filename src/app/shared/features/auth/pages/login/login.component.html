@@ -16,7 +16,9 @@
         >
         <div class="error-message" *ngIf="loginForm.get('email')?.touched && loginForm.get('email')?.invalid">
           <span *ngIf="loginForm.get('email')?.errors?.['required']">Email is required</span>
-          <span *ngIf="loginForm.get('email')?.errors?.['email']">Please enter a valid email</span>
+          <span *ngIf="loginForm.get('email')?.errors?.['email'] || loginForm.get('email')?.errors?.['pattern']">
+            Please enter a valid email address
+          </span>
         </div>
       </div>
 
@@ -24,13 +26,22 @@
         <label for="password">Password</label>
         <input
           id="password"
-          type="password"
+          [type]="showPassword ? 'text' : 'password'"
           formControlName="password"
           placeholder="Enter your password"
           [class.invalid]="loginForm.get('password')?.touched && loginForm.get('password')?.invalid"
         >
+        <button type="button" class="password-toggle" (click)="togglePasswordVisibility()">
+          <span class="material-icons">{{ showPassword ? 'visibility_off' : 'visibility' }}</span>
+        </button>
         <div class="error-message" *ngIf="loginForm.get('password')?.touched && loginForm.get('password')?.invalid">
           <span *ngIf="loginForm.get('password')?.errors?.['required']">Password is required</span>
+          <span *ngIf="loginForm.get('password')?.errors?.['minlength']">
+            Password must be at least 6 characters long
+          </span>
+          <span *ngIf="loginForm.get('password')?.errors?.['pattern']">
+            Password must contain at least one number, one uppercase, one lowercase letter and one special character
+          </span>
         </div>
       </div>
 
@@ -38,9 +49,12 @@
         {{ loginError }}
       </div>
 
-      <button type="submit" [disabled]="loginForm.invalid || isLoading">
+      <button type="submit" [disabled]="loginForm.invalid || isLoading" class="login-button">
         <span *ngIf="!isLoading">Login</span>
-        <span *ngIf="isLoading">Logging in...</span>
+        <div *ngIf="isLoading" class="loading-indicator">
+          <span class="loading-text">Logging in...</span>
+          <div class="spinner"></div>
+        </div>
       </button>
 
       <div class="register-link">

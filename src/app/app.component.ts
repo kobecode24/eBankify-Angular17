@@ -1,4 +1,3 @@
-// src/app/app.component.ts
 import {Component, OnInit} from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import {AuthService} from "./core/services/auth.service";

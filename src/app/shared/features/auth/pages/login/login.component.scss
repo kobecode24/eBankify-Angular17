@@ -114,3 +114,52 @@
     font-size: 1.5rem;
   }
 }
+
+.loading-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: #fff;
+  animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.password-toggle {
+  font-size: 12px;
+  padding: 8px 8px;
+  height: 45px;
+  width: auto;
+  cursor: pointer;
+  margin-top: 0.25rem;
+}
+
+.form-group {
+  position: relative;
+}
+
+.error-message {
+  color: #dc3545;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+}
+
+.login-button {
+  position: relative;
+  min-height: 2.5rem;
+
+  &:disabled {
+    background-color: #6c757d;
+    cursor: not-allowed;
+  }
+}
