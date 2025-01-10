@@ -47,7 +47,7 @@
               "outputHashing": "all"
             },
             "development": {
-              "optimization": true,
+              "optimization": false,
               "extractLicenses": false,
               "sourceMap": true
             }
@@ -61,8 +61,7 @@
               "buildTarget": "eBankify-Angular17:build:production"
             },
             "development": {
-              "buildTarget": "eBankify-Angular17:build:development",
-              "proxyConfig": "../proxy.conf.json"
+              "buildTarget": "eBankify-Angular17:build:development"
             }
           },
           "defaultConfiguration": "development"

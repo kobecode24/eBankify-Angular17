@@ -5,6 +5,13 @@ import { provideAnimations } from '@angular/platform-browser/animations';
 import { AppComponent } from "./app.component";
 import { routes } from "./app.routes";
 import { AuthInterceptor } from './core/interceptors/auth.interceptor';
+import {enableProdMode} from "@angular/core";
+import {environment} from "../../environment.prod";
+
+
+if (environment.production) {
+  enableProdMode();
+}
 
 bootstrapApplication(AppComponent, {
   providers: [

@@ -11,5 +11,12 @@
 </head>
 <body class="mat-typography">
   <app-root></app-root>
+  <script>
+    window.addEventListener('DOMContentLoaded', (event) => {
+      window.ng = window.ng || {};
+      window.ng.probe = window.ng.probe || function() {};
+      window.ng.coreTokens = window.ng.coreTokens || {};
+    });
+  </script>
 </body>
 </html>

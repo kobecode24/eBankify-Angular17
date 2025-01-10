@@ -43,7 +43,7 @@ describe("AuthService", () => {
       }
     };
 
-    service.login({ email: "test@example.com", password: "password123" })
+    service.login({ email: "admin-secondary@example.com", password: "Test123#!" })
       .subscribe(response => {
         expect(response).toEqual(jasmine.objectContaining({
           userId: mockResponse.user.userId,

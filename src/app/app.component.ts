@@ -10,7 +10,9 @@ import {tap} from "rxjs/operators";
   template: `<router-outlet></router-outlet>`
 })
 export class AppComponent implements OnInit {
-  constructor(private authService: AuthService) {}
+  constructor(private authService: AuthService) {
+    (window as any).ng.probe = (window as any).ng.probe || function() {};
+  }
 
   ngOnInit() {
     console.debug('Application initialization started');

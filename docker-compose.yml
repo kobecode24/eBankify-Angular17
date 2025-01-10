@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  frontend:
+    image: ebankify-frontend:latest
+    ports:
+      - "8080:80"
+    networks:
+      - ebankify-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+networks:
+  ebankify-network:
+    driver: bridge
