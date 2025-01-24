@@ -59,22 +59,6 @@ describe('LoginComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  /*it('should handle successful login', fakeAsync(() => {
-    const credentials = {
-      email: 'test@example.com',
-      password: 'Test123#!'
-    };
-
-    authService.login.and.returnValue(of(mockUser));
-
-    component.loginForm.setValue(credentials);
-    component.onSubmit();
-    tick();
-
-    expect(authService.login).toHaveBeenCalledWith(credentials);
-    expect(component.isLoading).toBeFalse();
-  }));*/
-
   it('should show error message on login failure', fakeAsync(() => {
     const credentials = {
       email: 'test@example.com',

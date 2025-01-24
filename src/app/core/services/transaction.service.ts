@@ -11,6 +11,7 @@ import {
 } from '../models/transaction.model';
 import { environment } from '../../../environments/environment';
 import {map} from "rxjs/operators";
+import {CartTransaction} from "../models/cart-transaction.model";
 
 @Injectable({ providedIn: 'root' })
 export class TransactionService {
@@ -268,5 +269,24 @@ export class TransactionService {
       ...tx,
       createdAt: new Date(tx.createdAt)
     })));
+  }
+
+  getPendingTransactions(): Observable<CartTransaction[]> {
+    return this.http.get<CartTransaction[]>(`${environment.apiUrl}/transactions/pending`);
+  }
+
+  processTransaction(transaction: TransactionRequest): Observable<TransactionResponse> {
+    return this.http.post<TransactionResponse>(
+      `${environment.apiUrl}/transactions`,
+      transaction
+    ).pipe(
+      tap(response => {
+        console.log('Transaction processed:', response);
+      }),
+      catchError(error => {
+        console.error('Transaction failed:', error);
+        return throwError(() => error);
+      })
+    );
   }
 }

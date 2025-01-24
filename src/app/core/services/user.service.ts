@@ -1,8 +1,10 @@
 import { Injectable } from "@angular/core";
 import { HttpClient, HttpParams } from "@angular/common/http";
-import { Observable } from "rxjs";
+import {Observable, of} from "rxjs";
 import { UserRole } from "../models/user.model";
 import { environment } from "../../../environments/environment";
+import {AccountResponse} from "../models/account.model";
+import {catchError} from "rxjs/operators";
 
 // Define the UserResponse interface to match your backend response
 export interface UserResponse {
@@ -22,8 +24,21 @@ export interface UserResponse {
 @Injectable({ providedIn: 'root' })
 export class UserService {
   private readonly API_URL = `${environment.apiUrl}/users`;
+  private readonly API_URL_SEARCH = `${environment.apiUrl}`;
 
   constructor(private http: HttpClient) {}
+
+  searchAccounts(term: string): Observable<AccountResponse[]> {
+    if (!term) {
+      return of([]);
+    }
+
+    return this.http.get<AccountResponse[]>(`${this.API_URL_SEARCH}/accounts/search`, {
+      params: { query: term }
+    }).pipe(
+      catchError(() => of([]))
+    );
+  }
 
   getAllUsers(): Observable<UserResponse[]> {
     return this.http.get<UserResponse[]>(this.API_URL);

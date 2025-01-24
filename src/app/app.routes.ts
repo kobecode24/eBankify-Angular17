@@ -86,6 +86,12 @@ export const routes: Routes = [
         loadComponent: () => import('./shared/features/accounts/account-list/account-list.component')
           .then(m => m.AccountListComponent)
       },
+
+      {
+        path: 'cart',
+        loadComponent: () => import('./features/cart/cart.component')
+          .then(m => m.CartComponent)
+      },
     ]
   },
 
